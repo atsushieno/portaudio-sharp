@@ -2,8 +2,8 @@
 PA_PATH=$(PORTAUDIO_PATH)
 CXXI_DLL=libs/Mono.Cxxi.dll
 
-portaudio-sharp.dll: output/Libs.cs $(CXXI_DLL)
-	mcs -debug -t:library -out:portaudio-sharp.dll output/*.cs -unsafe -r:$(CXXI_DLL)
+portaudio-sharp.dll: output/Libs.cs $(CXXI_DLL) PortAudioInterop.cs
+	mcs -debug -t:library -out:portaudio-sharp.dll PortAudioInterop.cs output/*.cs -unsafe -r:$(CXXI_DLL)
 
 output/Libs.cs: portaudio.xml
 	generator portaudio.xml --lib=portaudio --ns=Commons.Media.PortAudio
