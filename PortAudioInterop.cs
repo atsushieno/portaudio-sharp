@@ -75,10 +75,10 @@ namespace Commons.Media.PortAudio
 		IntPtr/*IntPtr/*PaStreamParameters * */outputParameters, double sampleRate)
 			;
 		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_OpenStream (IntPtr/*PaStream * */stream, /*const*/ IntPtr/*PaStreamParameters * */inputParameters, /*const*/ IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, /*unsigned*/ulong framesPerBuffer, PaStreamFlags streamFlags, IntPtr/*PaStreamCallback * */streamCallback, IntPtr/*void **/userData)
+		PaError 	Pa_OpenStream (out IntPtr/*PaStream ** */stream, /*const*/ IntPtr/*PaStreamParameters * */inputParameters, /*const*/ IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, /*unsigned*/ulong framesPerBuffer, PaStreamFlags streamFlags, IntPtr/*PaStreamCallback * */streamCallback, IntPtr/*void **/userData)
 			;
 		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_OpenDefaultStream (IntPtr/*PaStream * */stream, int numInputChannels, int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, /*unsigned*/ulong framesPerBuffer, IntPtr/*PaStreamCallback * */streamCallback, IntPtr/*void **/userData)
+		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, /*unsigned*/ulong framesPerBuffer, IntPtr/*PaStreamCallback * */streamCallback, IntPtr/*void **/userData)
 			;
 		[DllImport ("portaudio")] public static extern
 		PaError 	Pa_CloseStream (IntPtr/*PaStream * */stream)
