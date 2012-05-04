@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 #region Typedefs
-using PaError			= System.Int32;		// typedef int 	PaError
+using PaError			= Commons.Media.PortAudio.PaErrorCode;		// typedef int 	PaError
 using PaDeviceIndex		= System.Int32;		// typedef int 	PaDeviceIndex
 using PaHostApiIndex		= System.Int32;		// typedef int 	PaHostApiIndex
 using PaTime			= System.Double;	// typedef double 	PaTime
@@ -11,28 +11,32 @@ using PaSampleFormat		= System.UInt64;	// typedef unsigned long 	PaSampleFormat
 using PaStream			= System.Void;		// typedef void 	PaStream
 using PaStreamFlags		= System.UInt64;	// typedef unsigned long 	PaStreamFlags
 using PaStreamCallbackFlags	= System.UInt64;	// typedef unsigned long 	PaStreamCallbackFlags
-//typedef int 	PaStreamCallback (const IntPtr/*void **/input, IntPtr/*void **/output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, IntPtr/*void **/userData)
-//typedef void 	PaStreamFinishedCallback (IntPtr/*void **/userData)
 #endregion
 
 namespace Commons.Media.PortAudio
 {
 	#region Typedefs -> delegates
-	public delegate int 	PaStreamCallback (/*const*/ IntPtr/*IntPtr/*void **/input, IntPtr/*IntPtr/*void **/output, /*unsigned*/ ulong frameCount, /*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, PaStreamCallbackFlags statusFlags, IntPtr/*IntPtr/*void **/userData);
-	public delegate void 	PaStreamFinishedCallback (IntPtr/*IntPtr/*void **/userData);
+	public delegate int 	PaStreamCallback (/*const*/ IntPtr/*void **/input, IntPtr/**void **/output, /*unsigned*/ ulong frameCount, /*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, PaStreamCallbackFlags statusFlags, IntPtr/*void **/userData);
+	public delegate void 	PaStreamFinishedCallback (IntPtr/*void **/userData);
 	#endregion
 	
 	public static class PortAudioInterop
 	{
+		static PortAudioInterop ()
+		{
+			Pa_Initialize ();
+			AppDomain.CurrentDomain.DomainUnload += (o, args) => Pa_Terminate ();
+		}
+		
 		#region Functions
 		[DllImport ("portaudio")] public static extern
 		int 	Pa_GetVersion (/*void*/)
 			;
 		[DllImport ("portaudio")] public static extern
-		/*const*/ IntPtr/*char * */ 	Pa_GetVersionText (/*void*/)
+		/*const*/ string/*char * */ 	Pa_GetVersionText (/*void*/)
 			;
 		[DllImport ("portaudio")] public static extern
-		/*const*/ IntPtr/*char * */ 	Pa_GetErrorText (PaError errorCode)
+		/*const*/ string/*char * */ 	Pa_GetErrorText (PaError errorCode)
 			;
 		[DllImport ("portaudio")] public static extern
 		PaError 	Pa_Initialize (/*void*/)
@@ -71,20 +75,20 @@ namespace Commons.Media.PortAudio
 		/*const*/ IntPtr/*PaDeviceInfo * */ 	Pa_GetDeviceInfo (PaDeviceIndex device)
 			;
 		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_IsFormatSupported (/*const*/ IntPtr/*IntPtr/*PaStreamParameters * */inputParameters, /*const*/ 
-		IntPtr/*IntPtr/*PaStreamParameters * */outputParameters, double sampleRate)
+		PaError 	Pa_IsFormatSupported (/*const*/ IntPtr/*PaStreamParameters * */inputParameters, /*const*/ 
+		IntPtr/*PaStreamParameters * */outputParameters, double sampleRate)
 			;
 		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_OpenStream (out IntPtr/*PaStream ** */stream, /*const*/ IntPtr/*PaStreamParameters * */inputParameters, /*const*/ IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, /*unsigned*/ulong framesPerBuffer, PaStreamFlags streamFlags, IntPtr/*PaStreamCallback * */streamCallback, IntPtr/*void **/userData)
+		PaError 	Pa_OpenStream (out IntPtr/*PaStream ** */stream, /*const*/ IntPtr/*PaStreamParameters * */inputParameters, /*const*/ IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, /*unsigned*/ulong framesPerBuffer, PaStreamFlags streamFlags, PaStreamCallback streamCallback, IntPtr/*void **/userData)
 			;
 		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, /*unsigned*/ulong framesPerBuffer, IntPtr/*PaStreamCallback * */streamCallback, IntPtr/*void **/userData)
+		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, /*unsigned*/ulong framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
 			;
 		[DllImport ("portaudio")] public static extern
 		PaError 	Pa_CloseStream (IntPtr/*PaStream * */stream)
 			;
 		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_SetStreamFinishedCallback (IntPtr/*PaStream * */stream, IntPtr/*PaStreamFinishedCallback * */streamFinishedCallback)
+		PaError 	Pa_SetStreamFinishedCallback (IntPtr/*PaStream * */stream, PaStreamFinishedCallback streamFinishedCallback)
 			;
 		[DllImport ("portaudio")] public static extern
 		PaError 	Pa_StartStream (IntPtr/*PaStream * */stream)
@@ -122,8 +126,10 @@ namespace Commons.Media.PortAudio
 		[DllImport ("portaudio")] public static extern
 		/*signed*/ long 	Pa_GetStreamWriteAvailable (IntPtr/*PaStream * */stream)
 			;
+
+		// Return value is originally defined as PaError but this should rather make sense.
 		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_GetSampleSize (PaSampleFormat format)
+		int 	Pa_GetSampleSize (PaSampleFormat format)
 			;
 		[DllImport ("portaudio")] public static extern
 		void 	Pa_Sleep (long msec)
