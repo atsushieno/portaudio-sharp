@@ -1,4 +1,3 @@
-This folder contains cxxi-based binding generated for portaudio r1788 (v19).
+C# binding for portaudio r1788 (v19).
 
-To build the dll, run:
-PORTAUDIO_PATH=/path/to/portaudio/source make
+To build the dll, run make.
