@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Mono.Cxxi;
 
 namespace Commons.Media.PortAudio
 {
@@ -33,7 +32,7 @@ namespace Commons.Media.PortAudio
 			if (ptr == IntPtr.Zero)
 				ThrowLastError ();
 			using (var cppptr = new CppInstancePtr (ptr))
-				return new PaHostApiInfo (cppptr);
+				return Factory.Create<PaHostApiInfo> (cppptr);
 		}
 		
 		public static int HostApiTypeIdToHostApiIndex (PaHostApiTypeId type)
@@ -49,7 +48,7 @@ namespace Commons.Media.PortAudio
 		public static PaHostErrorInfo GetLastHostErrorInfo ()
 		{
 			using (var cppptr = new CppInstancePtr (PortAudioInterop.Pa_GetLastHostErrorInfo ()))
-				return new PaHostErrorInfo (cppptr);
+				return Factory.Create<PaHostErrorInfo> (cppptr);
 		}
 		
 		public static int DeviceCount {
@@ -70,12 +69,14 @@ namespace Commons.Media.PortAudio
 			if (ptr == IntPtr.Zero)
 				ThrowLastError ();
 			using (var cppptr = new CppInstancePtr (ptr))
-				return new PaDeviceInfo (cppptr);
+				return Factory.Create<PaDeviceInfo> (cppptr);
 		}
 		
 		public static PaErrorCode CheckIfFormatSupported (PaStreamParameters inputParameters, PaStreamParameters outputParameters, double sampleRate)
 		{
-			return PortAudioInterop.Pa_IsFormatSupported (inputParameters.Native.Native, outputParameters.Native.Native, sampleRate);
+			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
+				using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
+					return PortAudioInterop.Pa_IsFormatSupported (input.Native, output.Native, sampleRate);
 		}
 		
 		public static int GetSampleSize (ulong format)
@@ -95,7 +96,7 @@ namespace Commons.Media.PortAudio
 		internal static void ThrowLastError ()
 		{
 			var ret = PortAudioInterop.Pa_GetLastHostErrorInfo ();
-			var ei = new PaHostErrorInfo (new CppInstancePtr (ret));
+			var ei = Factory.Create<PaHostErrorInfo> (new CppInstancePtr (ret));
 			if (ei.errorCode < 0)
 				throw new PortAudioException (ei);
 		}

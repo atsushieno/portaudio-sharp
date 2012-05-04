@@ -136,6 +136,126 @@ namespace Commons.Media.PortAudio
 			;
 		#endregion
 	}
+
+#if !USE_CXXI
+
+	public static class Factory
+	{
+		public static CppInstancePtr ToNative<T> (T value)
+		{
+			IntPtr ret = Marshal.AllocHGlobal (Marshal.SizeOf (value));
+			Marshal.StructureToPtr (value, ret, false);
+			return CppInstancePtr.Create<T> (ret);
+		}
+		
+		public static T Create<T> (CppInstancePtr handle)
+		{
+			return (T) Marshal.PtrToStructure (handle.Native, typeof (T));
+		}
+		
+	}
+
+	[StructLayout (LayoutKind.Sequential)]
+	public struct PaHostApiInfo
+	{
+		public int 	structVersion;
+		public PaHostApiTypeId 	type;
+		[MarshalAs (UnmanagedType.LPStr)]
+		public string 	name;
+		public int 	deviceCount;
+		public PaDeviceIndex 	defaultInputDevice;
+		public PaDeviceIndex 	defaultOutputDevice;
+	}
+	
+	[StructLayout (LayoutKind.Sequential)]
+	public struct PaHostErrorInfo
+	{
+		public PaHostApiTypeId 	hostApiType;
+		public long 	errorCode;
+		[MarshalAs (UnmanagedType.LPStr)]
+		public string 	errorText;
+	}
+
+	[StructLayout (LayoutKind.Sequential)]
+	public struct PaDeviceInfo
+	{
+		public int 	structVersion;
+		[MarshalAs (UnmanagedType.LPStr)]
+		public string 	name;
+		public PaHostApiIndex 	hostApi;
+		public int 	maxInputChannels;
+		public int 	maxOutputChannels;
+		public PaTime 	defaultLowInputLatency;
+		public PaTime 	defaultLowOutputLatency;
+		public PaTime 	defaultHighInputLatency;
+		public PaTime 	defaultHighOutputLatency;
+		public double 	defaultSampleRate;
+	}
+
+	[StructLayout (LayoutKind.Sequential)]
+	public struct PaStreamParameters 
+	{
+		public PaDeviceIndex 	device;
+		public int 	channelCount;
+		public PaSampleFormat 	sampleFormat;
+		public PaTime 	suggestedLatency;
+		public IntPtr 	hostApiSpecificStreamInfo;
+	}
+
+	[StructLayout (LayoutKind.Sequential)]
+	public struct PaStreamCallbackTimeInfo 
+	{
+		public PaTime 	inputBufferAdcTime;
+		public PaTime 	currentTime;
+		public PaTime 	outputBufferDacTime;
+	}
+
+	[StructLayout (LayoutKind.Sequential)]
+	public struct PaStreamInfo 
+	{
+		public int 	structVersion;
+		public PaTime 	inputLatency;
+		public PaTime 	outputLatency;
+		public double 	sampleRate;
+	}
+	
+	public struct CppInstancePtr : IDisposable
+	{
+		IntPtr ptr;
+		bool delete;
+		Type type;
+		
+		public CppInstancePtr (IntPtr ptr)
+		{
+			this.ptr = ptr;
+			delete = false;
+			type = null;
+		}
+		
+		public static CppInstancePtr Create<T> (IntPtr ptr)
+		{
+			return new CppInstancePtr (ptr, typeof (T));
+		}
+		
+		CppInstancePtr (IntPtr ptr, Type type)
+		{
+			this.ptr = ptr;
+			this.delete = true;
+			this.type = type;
+		}
+
+		public void Dispose ()
+		{
+			if (delete)
+				Marshal.DestroyStructure (ptr, type);
+		}
+		
+		public IntPtr Native {
+			get { return ptr; }
+		}
+	}
+#endif
+
 }
 
 

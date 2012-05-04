@@ -1,5 +1,7 @@
 using System;
+#if USE_CXXI
 using Mono.Cxxi;
+#endif
 
 namespace Commons.Media.PortAudio
 {
@@ -17,7 +19,9 @@ namespace Commons.Media.PortAudio
 		
 		public PortAudioStream (PaStreamParameters inputParameters, PaStreamParameters outputParameters, double sampleRate, ulong framesPerBuffer, ulong streamFlags, StreamCallback streamCallback, IntPtr userData)
 		{
-			HandleError (PortAudioInterop.Pa_OpenStream (out handle, inputParameters.Native.Native, outputParameters.Native.Native, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback), userData));
+			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
+				using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
+					HandleError (PortAudioInterop.Pa_OpenStream (out handle, input.Native, output.Native, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback), userData));
 		}
 		
 		public PortAudioStream (int numInputChannels, int numOutputChannels, ulong sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
@@ -30,7 +34,7 @@ namespace Commons.Media.PortAudio
 			return (input, output, frameCount, timeInfo, statusFlags, userData) => {
 				var ptr = timeInfo != IntPtr.Zero ? new CppInstancePtr (timeInfo) : default (CppInstancePtr);
 				try {
-					return src (input, output, frameCount, timeInfo != IntPtr.Zero ? new PaStreamCallbackTimeInfo (ptr) : null, statusFlags, userData);
+					return src (input, output, frameCount, timeInfo != IntPtr.Zero ? Factory.Create<PaStreamCallbackTimeInfo> (ptr) : default (PaStreamCallbackTimeInfo), statusFlags, userData);
 				} finally {
 					ptr.Dispose ();
 				}
@@ -96,7 +100,7 @@ namespace Commons.Media.PortAudio
 				if (ptr == IntPtr.Zero)
 					ThrowLastError ();
 				using (var cppptr = new CppInstancePtr (ptr))
-					return new PaStreamInfo (cppptr);
+					return Factory.Create<PaStreamInfo> (cppptr);
 			}
 		}
 		
