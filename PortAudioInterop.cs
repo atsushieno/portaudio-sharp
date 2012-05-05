@@ -20,7 +20,7 @@ using PaStreamFlags		= System.UInt32;
 namespace Commons.Media.PortAudio
 {
 	#region Typedefs -> delegates
-	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input,IntPtr/**void **/output,/*unsigned long*/uint frameCount,/*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo,PaStreamCallbackFlags statusFlags,IntPtr/*void **/userData);
+	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input,IntPtr/**void **/output, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/uint frameCount,/*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, [MarshalAs (UnmanagedType.SysUInt)] PaStreamCallbackFlags statusFlags,IntPtr/*void **/userData);
 
 	public delegate void PaStreamFinishedCallback (IntPtr/*void **/userData);
 	#endregion
@@ -46,7 +46,7 @@ namespace Commons.Media.PortAudio
 
 		[DllImport ("portaudio")]
 		public static extern
-		/*const*/ string/*char * */ 	Pa_GetErrorText (PaError errorCode)
+		/*const*/ IntPtr/*char * */ 	Pa_GetErrorText (PaError errorCode)
 			;
 
 		[DllImport ("portaudio")]
@@ -117,12 +117,12 @@ namespace Commons.Media.PortAudio
 
 		[DllImport ("portaudio")]
 		public static extern
-		PaError 	Pa_OpenStream (out IntPtr/*PaStream ** */stream, /*const*/IntPtr/*PaStreamParameters * */inputParameters, /*const*/IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, /*unsigned long*/uint framesPerBuffer, PaStreamFlags streamFlags, PaStreamCallback streamCallback, IntPtr/*void **/userData)
+		PaError 	Pa_OpenStream (out IntPtr/*PaStream ** */stream, /*const*/IntPtr/*PaStreamParameters * */inputParameters, /*const*/IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/uint framesPerBuffer, [MarshalAs (UnmanagedType.SysUInt)] PaStreamFlags streamFlags, PaStreamCallback streamCallback, IntPtr/*void **/userData)
 			;
 
 		[DllImport ("portaudio")]
 		public static extern
-		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, /*unsigned long*/uint framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
+		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, [MarshalAs (UnmanagedType.SysUInt)] PaSampleFormat sampleFormat, double sampleRate, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/uint framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
 			;
 
 		[DllImport ("portaudio")]
@@ -177,20 +177,22 @@ namespace Commons.Media.PortAudio
 
 		[DllImport ("portaudio")]
 		public static extern
-		PaError 	Pa_ReadStream (IntPtr/*PaStream * */stream, IntPtr/*void **/buffer, /*unsigned long*/uint frames)
+		PaError 	Pa_ReadStream (IntPtr/*PaStream * */stream, IntPtr/*void **/buffer, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/uint frames)
 			;
 
 		[DllImport ("portaudio")]
 		public static extern
-		PaError 	Pa_WriteStream (IntPtr/*PaStream * */stream, /*const*/IntPtr/*void **/buffer, /*unsigned long*/uint frames)
+		PaError 	Pa_WriteStream (IntPtr/*PaStream * */stream, /*const*/IntPtr/*void **/buffer, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/uint frames)
 			;
 
 		[DllImport ("portaudio")]
+		[return: MarshalAs (UnmanagedType.SysInt)]
 		public static extern
 		/*signed long*/int 	Pa_GetStreamReadAvailable (IntPtr/*PaStream * */stream)
 			;
 
 		[DllImport ("portaudio")]
+		[return: MarshalAs (UnmanagedType.SysUInt)]
 		public static extern
 		/*signed long*/int 	Pa_GetStreamWriteAvailable (IntPtr/*PaStream * */stream)
 			;
@@ -198,12 +200,12 @@ namespace Commons.Media.PortAudio
 		// Return value is originally defined as PaError but this should rather make sense.
 		[DllImport ("portaudio")]
 		public static extern
-		int 	Pa_GetSampleSize (PaSampleFormat format)
+		int 	Pa_GetSampleSize ([MarshalAs (UnmanagedType.SysUInt)] PaSampleFormat format)
 			;
 
 		[DllImport ("portaudio")]
 		public static extern
-		void 	Pa_Sleep (/*long*/int msec)
+		void 	Pa_Sleep ([MarshalAs (UnmanagedType.SysInt)] /*long*/int msec)
 			;
 		#endregion
 	}
@@ -243,6 +245,7 @@ namespace Commons.Media.PortAudio
 	public struct PaHostErrorInfo
 	{
 		public PaHostApiTypeId 	hostApiType;
+		[MarshalAs (UnmanagedType.SysInt)]
 		public /*long*/int 	errorCode;
 		[MarshalAs (UnmanagedType.LPStr)]
 		public string
@@ -271,6 +274,7 @@ namespace Commons.Media.PortAudio
 	{
 		public PaDeviceIndex 	device;
 		public int 	channelCount;
+		[MarshalAs (UnmanagedType.SysUInt)]
 		public PaSampleFormat 	sampleFormat;
 		public PaTime 	suggestedLatency;
 		public IntPtr 	hostApiSpecificStreamInfo;

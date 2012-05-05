@@ -16,7 +16,7 @@ namespace Commons.Media.PortAudio
 
 		public static string GetErrorText (PaErrorCode errorCode)
 		{
-			return PortAudioInterop.Pa_GetErrorText (errorCode);
+			return Marshal.PtrToStringAuto (PortAudioInterop.Pa_GetErrorText (errorCode));
 		}
 		
 		public static int HostApiCount {
