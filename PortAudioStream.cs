@@ -5,29 +5,65 @@ namespace Commons.Media.PortAudio
 {
 	public class PortAudioInputStream : PortAudioStream
 	{
-		public PortAudioInputStream (PaStreamParameters inputParameters, double sampleRate, ulong framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioInputStream (PaStreamParameters inputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
 		{
 			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
-				HandleError (PortAudioInterop.Pa_OpenStream (out handle, input.Native, IntPtr.Zero, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback, false), userData));
+				HandleError (PortAudioInterop.Pa_OpenStream (
+					out handle,
+					input.Native,
+					IntPtr.Zero,
+					sampleRate,
+					framesPerBuffer,
+					streamFlags,
+					ToPaStreamCallback (streamCallback, false),
+					userData
+				));
 		}
 		
-		public PortAudioInputStream (int numInputChannels, PaSampleFormat sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioInputStream (int numInputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
 		{
-			HandleError (PortAudioInterop.Pa_OpenDefaultStream (out handle, numInputChannels, 0, sampleFormat, sampleRate, framesPerBuffer, ToPaStreamCallback (streamCallback, false), userData));
+			HandleError (PortAudioInterop.Pa_OpenDefaultStream (
+				out handle,
+				numInputChannels,
+				0,
+				sampleFormat,
+				sampleRate,
+				framesPerBuffer,
+				ToPaStreamCallback (streamCallback, false),
+				userData
+			));
 		}
 	}
 	
 	public class PortAudioOutputStream : PortAudioStream
 	{
-		public PortAudioOutputStream (PaStreamParameters outputParameters, double sampleRate, ulong framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioOutputStream (PaStreamParameters outputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
 		{
 			using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
-				HandleError (PortAudioInterop.Pa_OpenStream (out handle, IntPtr.Zero, output.Native, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback, true), userData));
+				HandleError (PortAudioInterop.Pa_OpenStream (
+					out handle,
+					IntPtr.Zero,
+					output.Native,
+					sampleRate,
+					framesPerBuffer,
+					streamFlags,
+					ToPaStreamCallback (streamCallback, true),
+					userData
+				));
 		}
 		
-		public PortAudioOutputStream (int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioOutputStream (int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
 		{
-			HandleError (PortAudioInterop.Pa_OpenDefaultStream (out handle, 0, numOutputChannels, sampleFormat, sampleRate, framesPerBuffer, ToPaStreamCallback (streamCallback, true), userData));
+			HandleError (PortAudioInterop.Pa_OpenDefaultStream (
+				out handle,
+				0,
+				numOutputChannels,
+				sampleFormat,
+				sampleRate,
+				framesPerBuffer,
+				ToPaStreamCallback (streamCallback, true),
+				userData
+			));
 		}
 	}
 
@@ -63,12 +99,16 @@ namespace Commons.Media.PortAudio
 			Close ();
 		}
 
-		public delegate PaStreamCallbackResult StreamCallback (byte [] buffer, int offset, int byteCount, PaStreamCallbackTimeInfo timeInfo, PaStreamCallbackFlags statusFlags, IntPtr userData);
+		public delegate PaStreamCallbackResult StreamCallback (byte[] buffer,int offset,int byteCount,PaStreamCallbackTimeInfo timeInfo,PaStreamCallbackFlags statusFlags,IntPtr userData);
+
 		public delegate void StreamFinishedCallback (IntPtr userData);
 		
 		public void SetStreamFinishedCallback (StreamFinishedCallback streamFinishedCallback)
 		{
-			HandleError (PortAudioInterop.Pa_SetStreamFinishedCallback (handle, userData => streamFinishedCallback (userData)));
+			HandleError (PortAudioInterop.Pa_SetStreamFinishedCallback (
+				handle,
+				userData => streamFinishedCallback (userData)
+			));
 		}
 		
 		public void StartStream ()
@@ -89,14 +129,14 @@ namespace Commons.Media.PortAudio
 		public bool IsStopped {
 			get {
 				var ret = HandleError (PortAudioInterop.Pa_IsStreamStopped (handle));
-				return (int) ret != 0;
+				return (int)ret != 0;
 			}
 		}
 		
 		public bool IsActive {
 			get {
 				var ret = HandleError (PortAudioInterop.Pa_IsStreamActive (handle));
-				return (int) ret != 0;
+				return (int)ret != 0;
 			}
 		}
 		
@@ -129,20 +169,28 @@ namespace Commons.Media.PortAudio
 		}
 		
 		// "The function doesn't return until the entire buffer has been filled - this may involve waiting for the operating system to supply the data." (!)
-		public void Read (byte [] buffer, int offset, ulong frames)
+		public void Read (byte[] buffer, int offset, uint frames)
 		{
 			unsafe {
 				fixed (byte* buf = buffer)
-					HandleError (PortAudioInterop.Pa_ReadStream (handle, (IntPtr) (buf + offset), frames));
+					HandleError (PortAudioInterop.Pa_ReadStream (
+						handle,
+						(IntPtr) (buf + offset),
+						frames
+					));
 			}
 		}
 		
 		// "The function doesn't return until the entire buffer has been filled - this may involve waiting for the operating system to supply the data." (!)
-		public void Write (byte [] buffer, int offset, ulong frames)
+		public void Write (byte[] buffer, int offset, uint frames)
 		{
 			unsafe {
 				fixed (byte* buf = buffer)
-					HandleError (PortAudioInterop.Pa_WriteStream (handle, (IntPtr) (buf + offset), frames));
+					HandleError (PortAudioInterop.Pa_WriteStream (
+						handle,
+						(IntPtr) (buf + offset),
+						frames
+					));
 			}
 		}
 		
@@ -150,16 +198,16 @@ namespace Commons.Media.PortAudio
 			get {
 				var ret = PortAudioInterop.Pa_GetStreamReadAvailable (handle);
 				if (ret < 0)
-					HandleError ((PaErrorCode) ret);
+					HandleError ((PaErrorCode)ret);
 				return ret;
 			}
 		}
 		
-		public long AvailableWriteFrames  {
+		public long AvailableWriteFrames {
 			get {
 				var ret = PortAudioInterop.Pa_GetStreamWriteAvailable (handle);
 				if (ret < 0)
-					HandleError ((PaErrorCode) ret);
+					HandleError ((PaErrorCode)ret);
 				return ret;
 			}
 		}
@@ -178,7 +226,7 @@ namespace Commons.Media.PortAudio
 		
 		int FramesToBytes (ulong frames)
 		{
-			return (int) frames;
+			return (int)frames;
 		}
 		
 		internal unsafe PaStreamCallback ToPaStreamCallback (StreamCallback src, bool isOutput)
@@ -186,13 +234,20 @@ namespace Commons.Media.PortAudio
 			return (input, output, frameCount, timeInfo, statusFlags, userData) => {
 				var ptr = timeInfo != IntPtr.Zero ? new CppInstancePtr (timeInfo) : default (CppInstancePtr);
 				try {
-					byte [] buf = buffer != null ? (byte []) buffer.Target : null;
+					byte [] buf = buffer != null ? (byte[])buffer.Target : null;
 					var byteCount = FramesToBytes (frameCount);
 					if (buf == null || buf.Length < byteCount) {
 						buf = new byte [byteCount];
 						buffer = new WeakReference (buf);
 					}
-					var ret = src (buf, 0, byteCount, timeInfo != IntPtr.Zero ? Factory.Create<PaStreamCallbackTimeInfo> (ptr) : default (PaStreamCallbackTimeInfo), statusFlags, userData);
+					var ret = src (
+						buf,
+						0,
+						byteCount,
+						timeInfo != IntPtr.Zero ? Factory.Create<PaStreamCallbackTimeInfo> (ptr) : default (PaStreamCallbackTimeInfo),
+						statusFlags,
+						userData
+					);
 					Marshal.Copy (buf, 0, isOutput ? output : input, byteCount);
 					return ret;
 				} finally {

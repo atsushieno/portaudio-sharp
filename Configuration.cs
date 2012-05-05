@@ -1,16 +1,17 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Commons.Media.PortAudio
 {
-	public  class Configuration
+	public class Configuration
 	{
 		public static int Version {
 			get { return PortAudioInterop.Pa_GetVersion (); }
 		}
 
 		public static string VersionString {
-			get { return PortAudioInterop.Pa_GetVersionText (); }
+			get { return Marshal.PtrToStringAnsi (PortAudioInterop.Pa_GetVersionText ()); }
 		}
 
 		public static string GetErrorText (PaErrorCode errorCode)
@@ -42,7 +43,10 @@ namespace Commons.Media.PortAudio
 		
 		public static int HostApiDeviceIndexToDeviceIndex (int hostApi, int hostApiDeviceIndex)
 		{
-			return PortAudioInterop.Pa_HostApiDeviceIndexToDeviceIndex (hostApi, hostApiDeviceIndex);
+			return PortAudioInterop.Pa_HostApiDeviceIndexToDeviceIndex (
+				hostApi,
+				hostApiDeviceIndex
+			);
 		}
 		
 		public static PaHostErrorInfo GetLastHostErrorInfo ()
@@ -75,20 +79,24 @@ namespace Commons.Media.PortAudio
 		public static PaErrorCode CheckIfFormatSupported (PaStreamParameters inputParameters, PaStreamParameters outputParameters, double sampleRate)
 		{
 			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
-				using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
-					return PortAudioInterop.Pa_IsFormatSupported (input.Native, output.Native, sampleRate);
+			using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
+				return PortAudioInterop.Pa_IsFormatSupported (
+					input.Native,
+					output.Native,
+					sampleRate
+				);
 		}
 		
 		public static int GetSampleSize (PaSampleFormat format)
 		{
 			var ret = PortAudioInterop.Pa_GetSampleSize (format);
-			HandleError ((PaErrorCode) ret);
+			HandleError ((PaErrorCode)ret);
 			return ret;
 		}
 		
 		internal static PaErrorCode HandleError (PaErrorCode errorCode)
 		{
-			if ((int) errorCode < 0)
+			if ((int)errorCode < 0)
 				throw new PortAudioException (errorCode);
 			return errorCode;
 		}

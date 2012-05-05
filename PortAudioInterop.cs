@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 #region Typedefs
-using PaError			= Commons.Media.PortAudio.PaErrorCode;		// typedef int 	PaError
-using PaDeviceIndex		= System.Int32;		// typedef int 	PaDeviceIndex
-using PaHostApiIndex		= System.Int32;		// typedef int 	PaHostApiIndex
-using PaTime			= System.Double;	// typedef double 	PaTime
+using PaError			= Commons.Media.PortAudio.PaErrorCode;
+// typedef int 	PaError
+using PaDeviceIndex		= System.Int32;
+// typedef int 	PaDeviceIndex
+using PaHostApiIndex		= System.Int32;
+// typedef int 	PaHostApiIndex
+using PaTime			= System.Double;
+// typedef double 	PaTime
 //using PaSampleFormat		= System.UInt64;	// typedef unsigned long 	PaSampleFormat
 //using PaStream			= System.Void;		// typedef void 	PaStream
-using PaStreamFlags		= System.UInt64;	// typedef unsigned long 	PaStreamFlags
+using PaStreamFlags		= System.UInt32;
+// typedef unsigned long 	PaStreamFlags
 #endregion
 
 namespace Commons.Media.PortAudio
 {
 	#region Typedefs -> delegates
-	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input, IntPtr/**void **/output, /*unsigned*/ ulong frameCount, /*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, PaStreamCallbackFlags statusFlags, IntPtr/*void **/userData);
+	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input,IntPtr/**void **/output,/*unsigned long*/uint frameCount,/*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo,PaStreamCallbackFlags statusFlags,IntPtr/*void **/userData);
+
 	public delegate void PaStreamFinishedCallback (IntPtr/*void **/userData);
 	#endregion
 	
@@ -28,110 +34,176 @@ namespace Commons.Media.PortAudio
 		}
 		
 		#region Functions
-		[DllImport ("portaudio")] public static extern
+		[DllImport ("portaudio")]
+		public static extern
 		int 	Pa_GetVersion (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
-		/*const*/ string/*char * */ 	Pa_GetVersionText (/*void*/)
+
+		[DllImport ("portaudio")]
+		public static extern
+		/*const*/ IntPtr/*char * */ 	Pa_GetVersionText (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		/*const*/ string/*char * */ 	Pa_GetErrorText (PaError errorCode)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_Initialize (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_Terminate (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaHostApiIndex 	Pa_GetHostApiCount (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaHostApiIndex 	Pa_GetDefaultHostApi (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		/*const*/ IntPtr/*PaHostApiInfo * */ 	Pa_GetHostApiInfo (PaHostApiIndex hostApi)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaHostApiIndex 	Pa_HostApiTypeIdToHostApiIndex (PaHostApiTypeId type)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaDeviceIndex 	Pa_HostApiDeviceIndexToDeviceIndex (PaHostApiIndex hostApi, int hostApiDeviceIndex)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		/*const*/ IntPtr/*PaHostErrorInfo * */ 	Pa_GetLastHostErrorInfo (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaDeviceIndex 	Pa_GetDeviceCount (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaDeviceIndex 	Pa_GetDefaultInputDevice (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaDeviceIndex 	Pa_GetDefaultOutputDevice (/*void*/)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		/*const*/ IntPtr/*PaDeviceInfo * */ 	Pa_GetDeviceInfo (PaDeviceIndex device)
 			;
-		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_IsFormatSupported (/*const*/ IntPtr/*PaStreamParameters * */inputParameters, /*const*/ 
+
+		[DllImport ("portaudio")]
+		public static extern
+		PaError 	Pa_IsFormatSupported (/*const*/IntPtr/*PaStreamParameters * */inputParameters, /*const*/ 
 		IntPtr/*PaStreamParameters * */outputParameters, double sampleRate)
 			;
-		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_OpenStream (out IntPtr/*PaStream ** */stream, /*const*/ IntPtr/*PaStreamParameters * */inputParameters, /*const*/ IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, /*unsigned*/ulong framesPerBuffer, PaStreamFlags streamFlags, PaStreamCallback streamCallback, IntPtr/*void **/userData)
+
+		[DllImport ("portaudio")]
+		public static extern
+		PaError 	Pa_OpenStream (out IntPtr/*PaStream ** */stream, /*const*/IntPtr/*PaStreamParameters * */inputParameters, /*const*/IntPtr/*PaStreamParameters * */outputParameters, double sampleRate, /*unsigned long*/uint framesPerBuffer, PaStreamFlags streamFlags, PaStreamCallback streamCallback, IntPtr/*void **/userData)
 			;
-		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, /*unsigned*/ulong framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
+
+		[DllImport ("portaudio")]
+		public static extern
+		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, /*unsigned long*/uint framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_CloseStream (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_SetStreamFinishedCallback (IntPtr/*PaStream * */stream, PaStreamFinishedCallback streamFinishedCallback)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_StartStream (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_StopStream (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_AbortStream (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_IsStreamStopped (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaError 	Pa_IsStreamActive (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		/*const*/ IntPtr/*PaStreamInfo * */	Pa_GetStreamInfo (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		PaTime 	Pa_GetStreamTime (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
+
+		[DllImport ("portaudio")]
+		public static extern
 		double 	Pa_GetStreamCpuLoad (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_ReadStream (IntPtr/*PaStream * */stream, IntPtr/*void **/buffer, /*unsigned*/ulong frames)
+
+		[DllImport ("portaudio")]
+		public static extern
+		PaError 	Pa_ReadStream (IntPtr/*PaStream * */stream, IntPtr/*void **/buffer, /*unsigned long*/uint frames)
 			;
-		[DllImport ("portaudio")] public static extern
-		PaError 	Pa_WriteStream (IntPtr/*PaStream * */stream, /*const*/ IntPtr/*void **/buffer, /*unsigned*/ulong frames)
+
+		[DllImport ("portaudio")]
+		public static extern
+		PaError 	Pa_WriteStream (IntPtr/*PaStream * */stream, /*const*/IntPtr/*void **/buffer, /*unsigned long*/uint frames)
 			;
-		[DllImport ("portaudio")] public static extern
-		/*signed*/ long 	Pa_GetStreamReadAvailable (IntPtr/*PaStream * */stream)
+
+		[DllImport ("portaudio")]
+		public static extern
+		/*signed long*/int 	Pa_GetStreamReadAvailable (IntPtr/*PaStream * */stream)
 			;
-		[DllImport ("portaudio")] public static extern
-		/*signed*/ long 	Pa_GetStreamWriteAvailable (IntPtr/*PaStream * */stream)
+
+		[DllImport ("portaudio")]
+		public static extern
+		/*signed long*/int 	Pa_GetStreamWriteAvailable (IntPtr/*PaStream * */stream)
 			;
 
 		// Return value is originally defined as PaError but this should rather make sense.
-		[DllImport ("portaudio")] public static extern
+		[DllImport ("portaudio")]
+		public static extern
 		int 	Pa_GetSampleSize (PaSampleFormat format)
 			;
-		[DllImport ("portaudio")] public static extern
-		void 	Pa_Sleep (long msec)
+
+		[DllImport ("portaudio")]
+		public static extern
+		void 	Pa_Sleep (/*long*/int msec)
 			;
 		#endregion
 	}
@@ -149,7 +221,7 @@ namespace Commons.Media.PortAudio
 		
 		public static T Create<T> (CppInstancePtr handle)
 		{
-			return (T) Marshal.PtrToStructure (handle.Native, typeof (T));
+			return (T)Marshal.PtrToStructure (handle.Native, typeof(T));
 		}
 		
 	}
@@ -160,7 +232,8 @@ namespace Commons.Media.PortAudio
 		public int 	structVersion;
 		public PaHostApiTypeId 	type;
 		[MarshalAs (UnmanagedType.LPStr)]
-		public string 	name;
+		public string
+			name;
 		public int 	deviceCount;
 		public PaDeviceIndex 	defaultInputDevice;
 		public PaDeviceIndex 	defaultOutputDevice;
@@ -170,9 +243,10 @@ namespace Commons.Media.PortAudio
 	public struct PaHostErrorInfo
 	{
 		public PaHostApiTypeId 	hostApiType;
-		public long 	errorCode;
+		public /*long*/int 	errorCode;
 		[MarshalAs (UnmanagedType.LPStr)]
-		public string 	errorText;
+		public string
+			errorText;
 	}
 
 	[StructLayout (LayoutKind.Sequential)]
@@ -180,7 +254,8 @@ namespace Commons.Media.PortAudio
 	{
 		public int 	structVersion;
 		[MarshalAs (UnmanagedType.LPStr)]
-		public string 	name;
+		public string
+			name;
 		public PaHostApiIndex 	hostApi;
 		public int 	maxInputChannels;
 		public int 	maxOutputChannels;
@@ -192,7 +267,7 @@ namespace Commons.Media.PortAudio
 	}
 
 	[StructLayout (LayoutKind.Sequential)]
-	public struct PaStreamParameters 
+	public struct PaStreamParameters
 	{
 		public PaDeviceIndex 	device;
 		public int 	channelCount;
@@ -202,7 +277,7 @@ namespace Commons.Media.PortAudio
 	}
 
 	[StructLayout (LayoutKind.Sequential)]
-	public struct PaStreamCallbackTimeInfo 
+	public struct PaStreamCallbackTimeInfo
 	{
 		public PaTime 	inputBufferAdcTime;
 		public PaTime 	currentTime;
@@ -210,7 +285,7 @@ namespace Commons.Media.PortAudio
 	}
 
 	[StructLayout (LayoutKind.Sequential)]
-	public struct PaStreamInfo 
+	public struct PaStreamInfo
 	{
 		public int 	structVersion;
 		public PaTime 	inputLatency;
@@ -233,7 +308,7 @@ namespace Commons.Media.PortAudio
 		
 		public static CppInstancePtr Create<T> (IntPtr ptr)
 		{
-			return new CppInstancePtr (ptr, typeof (T));
+			return new CppInstancePtr (ptr, typeof(T));
 		}
 		
 		CppInstancePtr (IntPtr ptr, Type type)
