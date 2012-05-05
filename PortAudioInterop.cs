@@ -7,7 +7,7 @@ using PaError			= Commons.Media.PortAudio.PaErrorCode;		// typedef int 	PaError
 using PaDeviceIndex		= System.Int32;		// typedef int 	PaDeviceIndex
 using PaHostApiIndex		= System.Int32;		// typedef int 	PaHostApiIndex
 using PaTime			= System.Double;	// typedef double 	PaTime
-using PaSampleFormat		= System.UInt64;	// typedef unsigned long 	PaSampleFormat
+//using PaSampleFormat		= System.UInt64;	// typedef unsigned long 	PaSampleFormat
 using PaStream			= System.Void;		// typedef void 	PaStream
 using PaStreamFlags		= System.UInt64;	// typedef unsigned long 	PaStreamFlags
 #endregion

@@ -11,7 +11,7 @@ namespace Commons.Media.PortAudio
 				HandleError (PortAudioInterop.Pa_OpenStream (out handle, input.Native, IntPtr.Zero, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback, false), userData));
 		}
 		
-		public PortAudioInputStream (int numInputChannels, ulong sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioInputStream (int numInputChannels, PaSampleFormat sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
 		{
 			HandleError (PortAudioInterop.Pa_OpenDefaultStream (out handle, numInputChannels, 0, sampleFormat, sampleRate, framesPerBuffer, ToPaStreamCallback (streamCallback, false), userData));
 		}
@@ -25,7 +25,7 @@ namespace Commons.Media.PortAudio
 				HandleError (PortAudioInterop.Pa_OpenStream (out handle, IntPtr.Zero, output.Native, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback, true), userData));
 		}
 		
-		public PortAudioOutputStream (int numOutputChannels, ulong sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioOutputStream (int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
 		{
 			HandleError (PortAudioInterop.Pa_OpenDefaultStream (out handle, 0, numOutputChannels, sampleFormat, sampleRate, framesPerBuffer, ToPaStreamCallback (streamCallback, true), userData));
 		}

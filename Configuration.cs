@@ -79,7 +79,7 @@ namespace Commons.Media.PortAudio
 					return PortAudioInterop.Pa_IsFormatSupported (input.Native, output.Native, sampleRate);
 		}
 		
-		public static int GetSampleSize (ulong format)
+		public static int GetSampleSize (PaSampleFormat format)
 		{
 			var ret = PortAudioInterop.Pa_GetSampleSize (format);
 			HandleError ((PaErrorCode) ret);

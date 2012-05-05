@@ -1,5 +1,3 @@
-#if !USE_CXXI
-
 namespace Commons.Media.PortAudio
 {
 	public enum PaErrorCode {
@@ -13,5 +11,3 @@ namespace Commons.Media.PortAudio
   paIncompatibleStreamHostApi, paBadBufferPtr
 }
 }
-
-#endif
