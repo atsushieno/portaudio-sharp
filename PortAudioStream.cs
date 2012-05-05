@@ -1,44 +1,50 @@
 using System;
-#if USE_CXXI
-using Mono.Cxxi;
-#endif
+using System.Runtime.InteropServices;
 
 namespace Commons.Media.PortAudio
 {
-	public class PortAudioStream : IDisposable
+	public class PortAudioInputStream : PortAudioStream
 	{
-		IntPtr handle;
+		public PortAudioInputStream (PaStreamParameters inputParameters, double sampleRate, ulong framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
+		{
+			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
+				HandleError (PortAudioInterop.Pa_OpenStream (out handle, input.Native, IntPtr.Zero, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback, false), userData));
+		}
 		
-		public PortAudioStream (IntPtr handle)
+		public PortAudioInputStream (int numInputChannels, ulong sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+		{
+			HandleError (PortAudioInterop.Pa_OpenDefaultStream (out handle, numInputChannels, 0, sampleFormat, sampleRate, framesPerBuffer, ToPaStreamCallback (streamCallback, false), userData));
+		}
+	}
+	
+	public class PortAudioOutputStream : PortAudioStream
+	{
+		public PortAudioOutputStream (PaStreamParameters outputParameters, double sampleRate, ulong framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
+		{
+			using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
+				HandleError (PortAudioInterop.Pa_OpenStream (out handle, IntPtr.Zero, output.Native, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback, true), userData));
+		}
+		
+		public PortAudioOutputStream (int numOutputChannels, ulong sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+		{
+			HandleError (PortAudioInterop.Pa_OpenDefaultStream (out handle, 0, numOutputChannels, sampleFormat, sampleRate, framesPerBuffer, ToPaStreamCallback (streamCallback, true), userData));
+		}
+	}
+
+	public abstract class PortAudioStream : IDisposable
+	{
+		internal IntPtr handle;
+		
+		protected PortAudioStream ()
+		{
+		}
+		
+		protected PortAudioStream (IntPtr handle)
 		{
 			if (handle == IntPtr.Zero)
 				throw new ArgumentNullException ("handle");
 			this.handle = handle;
 			should_dispose_handle = false;
-		}
-		
-		public PortAudioStream (PaStreamParameters inputParameters, PaStreamParameters outputParameters, double sampleRate, ulong framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
-		{
-			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
-				using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
-					HandleError (PortAudioInterop.Pa_OpenStream (out handle, input.Native, output.Native, sampleRate, framesPerBuffer, streamFlags, ToPaStreamCallback (streamCallback), userData));
-		}
-		
-		public PortAudioStream (int numInputChannels, int numOutputChannels, ulong sampleFormat, double sampleRate, ulong framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
-		{
-			HandleError (PortAudioInterop.Pa_OpenDefaultStream (out handle, numInputChannels, numOutputChannels, sampleFormat, sampleRate, framesPerBuffer, ToPaStreamCallback (streamCallback), userData));
-		}
-		
-		PaStreamCallback ToPaStreamCallback (StreamCallback src)
-		{
-			return (input, output, frameCount, timeInfo, statusFlags, userData) => {
-				var ptr = timeInfo != IntPtr.Zero ? new CppInstancePtr (timeInfo) : default (CppInstancePtr);
-				try {
-					return src (input, output, frameCount, timeInfo != IntPtr.Zero ? Factory.Create<PaStreamCallbackTimeInfo> (ptr) : default (PaStreamCallbackTimeInfo), statusFlags, userData);
-				} finally {
-					ptr.Dispose ();
-				}
-			};
 		}
 		
 		bool should_dispose_handle = true;
@@ -57,8 +63,8 @@ namespace Commons.Media.PortAudio
 			Close ();
 		}
 
-		public delegate int StreamCallback (IntPtr input, IntPtr output, ulong frameCount, PaStreamCallbackTimeInfo timeInfo, PaStreamCallbackFlags statusFlags, IntPtr userData);
-		public delegate void 	StreamFinishedCallback (IntPtr userData);
+		public delegate PaStreamCallbackResult StreamCallback (byte [] buffer, int offset, int byteCount, PaStreamCallbackTimeInfo timeInfo, PaStreamCallbackFlags statusFlags, IntPtr userData);
+		public delegate void StreamFinishedCallback (IntPtr userData);
 		
 		public void SetStreamFinishedCallback (StreamFinishedCallback streamFinishedCallback)
 		{
@@ -158,14 +164,41 @@ namespace Commons.Media.PortAudio
 			}
 		}
 		
-		static PaErrorCode HandleError (PaErrorCode errorCode)
+		internal static PaErrorCode HandleError (PaErrorCode errorCode)
 		{
 			return Configuration.HandleError (errorCode);
 		}
 		
-		static void ThrowLastError ()
+		internal static void ThrowLastError ()
 		{
 			Configuration.ThrowLastError ();
+		}
+		
+		WeakReference buffer;
+		
+		int FramesToBytes (ulong frames)
+		{
+			return (int) frames;
+		}
+		
+		internal unsafe PaStreamCallback ToPaStreamCallback (StreamCallback src, bool isOutput)
+		{
+			return (input, output, frameCount, timeInfo, statusFlags, userData) => {
+				var ptr = timeInfo != IntPtr.Zero ? new CppInstancePtr (timeInfo) : default (CppInstancePtr);
+				try {
+					byte [] buf = buffer != null ? (byte []) buffer.Target : null;
+					var byteCount = FramesToBytes (frameCount);
+					if (buf == null || buf.Length < byteCount) {
+						buf = new byte [byteCount];
+						buffer = new WeakReference (buf);
+					}
+					var ret = src (buf, 0, byteCount, timeInfo != IntPtr.Zero ? Factory.Create<PaStreamCallbackTimeInfo> (ptr) : default (PaStreamCallbackTimeInfo), statusFlags, userData);
+					Marshal.Copy (buf, 0, isOutput ? output : input, byteCount);
+					return ret;
+				} finally {
+					ptr.Dispose ();
+				}
+			};
 		}
 	}
 }

@@ -15,8 +15,8 @@ using PaStreamFlags		= System.UInt64;	// typedef unsigned long 	PaStreamFlags
 namespace Commons.Media.PortAudio
 {
 	#region Typedefs -> delegates
-	public delegate int 	PaStreamCallback (/*const*/ IntPtr/*void **/input, IntPtr/**void **/output, /*unsigned*/ ulong frameCount, /*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, PaStreamCallbackFlags statusFlags, IntPtr/*void **/userData);
-	public delegate void 	PaStreamFinishedCallback (IntPtr/*void **/userData);
+	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input, IntPtr/**void **/output, /*unsigned*/ ulong frameCount, /*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, PaStreamCallbackFlags statusFlags, IntPtr/*void **/userData);
+	public delegate void PaStreamFinishedCallback (IntPtr/*void **/userData);
 	#endregion
 	
 	public static class PortAudioInterop
