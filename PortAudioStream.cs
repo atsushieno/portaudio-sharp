@@ -17,7 +17,7 @@ namespace Commons.Media.PortAudio
 			should_dispose_handle = false;
 		}
 		
-		public PortAudioStream (PaStreamParameters inputParameters, PaStreamParameters outputParameters, double sampleRate, ulong framesPerBuffer, ulong streamFlags, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioStream (PaStreamParameters inputParameters, PaStreamParameters outputParameters, double sampleRate, ulong framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
 		{
 			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
 				using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
@@ -57,7 +57,7 @@ namespace Commons.Media.PortAudio
 			Close ();
 		}
 
-		public delegate int StreamCallback (IntPtr input, IntPtr output, ulong frameCount, PaStreamCallbackTimeInfo timeInfo, ulong statusFlags, IntPtr userData);
+		public delegate int StreamCallback (IntPtr input, IntPtr output, ulong frameCount, PaStreamCallbackTimeInfo timeInfo, PaStreamCallbackFlags statusFlags, IntPtr userData);
 		public delegate void 	StreamFinishedCallback (IntPtr userData);
 		
 		public void SetStreamFinishedCallback (StreamFinishedCallback streamFinishedCallback)

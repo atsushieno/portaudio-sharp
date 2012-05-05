@@ -1,5 +1,3 @@
-#if !USE_CXXI
-
 namespace Commons.Media.PortAudio
 {
 	public enum  	PaHostApiTypeId {
@@ -9,4 +7,3 @@ namespace Commons.Media.PortAudio
   paWASAPI = 13, paAudioScienceHPI = 14
 }
 }
-#endif

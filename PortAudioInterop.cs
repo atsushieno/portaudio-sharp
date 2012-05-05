@@ -10,7 +10,6 @@ using PaTime			= System.Double;	// typedef double 	PaTime
 using PaSampleFormat		= System.UInt64;	// typedef unsigned long 	PaSampleFormat
 using PaStream			= System.Void;		// typedef void 	PaStream
 using PaStreamFlags		= System.UInt64;	// typedef unsigned long 	PaStreamFlags
-using PaStreamCallbackFlags	= System.UInt64;	// typedef unsigned long 	PaStreamCallbackFlags
 #endregion
 
 namespace Commons.Media.PortAudio
