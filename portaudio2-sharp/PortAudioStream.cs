@@ -6,7 +6,7 @@ namespace Commons.Media.PortAudio
 	public class PortAudioInputStream : PortAudioStream
 	{
 		public PortAudioInputStream (PaStreamParameters inputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
-			: base (inputParameters.sampleFormat)
+			: base (inputParameters.sampleFormat, inputParameters.channelCount)
 		{
 			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
 				HandleError (PortAudioInterop.Pa_OpenStream (
@@ -22,7 +22,7 @@ namespace Commons.Media.PortAudio
 		}
 		
 		public PortAudioInputStream (int numInputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
-			: base (sampleFormat)
+			: base (sampleFormat, numInputChannels)
 		{
 			HandleError (PortAudioInterop.Pa_OpenDefaultStream (
 				out handle,
@@ -40,7 +40,7 @@ namespace Commons.Media.PortAudio
 	public class PortAudioOutputStream : PortAudioStream
 	{
 		public PortAudioOutputStream (PaStreamParameters outputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, object userData)
-			: base (outputParameters.sampleFormat)
+			: base (outputParameters.sampleFormat, outputParameters.channelCount)
 		{
 			var gch = userData == null ? default (GCHandle) : GCHandle.Alloc (userData, GCHandleType.Pinned);
 			try {
@@ -61,7 +61,7 @@ namespace Commons.Media.PortAudio
 		}
 		
 		public PortAudioOutputStream (int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, object userData)
-			: base (sampleFormat)
+			: base (sampleFormat, numOutputChannels)
 		{
 			var gch = userData == null ? default (GCHandle) : GCHandle.Alloc (userData, GCHandleType.Pinned);
 			try {
@@ -84,11 +84,13 @@ namespace Commons.Media.PortAudio
 	public abstract class PortAudioStream : IDisposable
 	{
 		internal IntPtr handle;
-		internal PaSampleFormat sample_format;
+		PaSampleFormat sample_format;
+		int channels;
 		
-		protected PortAudioStream (PaSampleFormat sampleFormat)
+		protected PortAudioStream (PaSampleFormat sampleFormat, int channels)
 		{
 			this.sample_format = sampleFormat;
+			this.channels = channels;
 		}
 		
 		protected PortAudioStream (IntPtr handle)
@@ -245,15 +247,15 @@ namespace Commons.Media.PortAudio
 			switch (sample_format) {
 			case PaSampleFormat.Int32:
 			case PaSampleFormat.Float32:
-				return (int) frames * 4;
+				return (int) frames * 4 * channels;
 			case PaSampleFormat.Int16:
-				return (int) frames * 2;
+				return (int) frames * 2 * channels;
 			case PaSampleFormat.Int24:
-				return (int) frames * 3;
+				return (int) frames * 3 * channels;
 			case PaSampleFormat.NonInterleaved:
 			case PaSampleFormat.Int8:
 			default:
-				return (int) frames;
+				return (int) frames * channels;
 			}
 		}
 		
