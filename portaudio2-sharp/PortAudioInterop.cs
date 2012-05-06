@@ -20,7 +20,7 @@ using PaStreamFlags		= System.UInt32;
 namespace Commons.Media.PortAudio
 {
 	#region Typedefs -> delegates
-	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input,IntPtr/**void **/output, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/uint frameCount,/*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, [MarshalAs (UnmanagedType.SysUInt)] PaStreamCallbackFlags statusFlags,IntPtr/*void **/userData);
+	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input,IntPtr/**void **/output, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/IntPtr frameCount,/*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, [MarshalAs (UnmanagedType.SysUInt)] UIntPtr/*PaStreamCallbackFlags*/ statusFlags,IntPtr/*void **/userData);
 
 	public delegate void PaStreamFinishedCallback (IntPtr/*void **/userData);
 	#endregion
@@ -122,7 +122,7 @@ namespace Commons.Media.PortAudio
 
 		[DllImport ("portaudio")]
 		public static extern
-		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, [MarshalAs (UnmanagedType.SysUInt)] PaSampleFormat sampleFormat, double sampleRate, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/uint framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
+		PaError 	Pa_OpenDefaultStream (out IntPtr/*PaStream ** */stream, int numInputChannels, int numOutputChannels, [MarshalAs (UnmanagedType.SysUInt)] IntPtr/*PaSampleFormat*/ sampleFormat, double sampleRate, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/IntPtr framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
 			;
 
 		[DllImport ("portaudio")]

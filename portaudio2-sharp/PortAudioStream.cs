@@ -26,9 +26,9 @@ namespace Commons.Media.PortAudio
 				out handle,
 				numInputChannels,
 				0,
-				sampleFormat,
+				(IntPtr) sampleFormat,
 				sampleRate,
-				framesPerBuffer,
+				(IntPtr) framesPerBuffer,
 				ToPaStreamCallback (streamCallback, false),
 				userData
 			));
@@ -58,9 +58,9 @@ namespace Commons.Media.PortAudio
 				out handle,
 				0,
 				numOutputChannels,
-				sampleFormat,
+				(IntPtr) sampleFormat,
 				sampleRate,
-				framesPerBuffer,
+				(IntPtr) framesPerBuffer,
 				ToPaStreamCallback (streamCallback, true),
 				userData
 			));
@@ -99,7 +99,7 @@ namespace Commons.Media.PortAudio
 			Close ();
 		}
 
-		public delegate PaStreamCallbackResult StreamCallback (byte[] buffer,int offset,int byteCount,PaStreamCallbackTimeInfo timeInfo,PaStreamCallbackFlags statusFlags,IntPtr userData);
+		public delegate PaStreamCallbackResult StreamCallback (byte[] buffer, int offset, int byteCount, PaStreamCallbackTimeInfo timeInfo, PaStreamCallbackFlags statusFlags, IntPtr userData);
 
 		public delegate void StreamFinishedCallback (IntPtr userData);
 		
@@ -235,7 +235,7 @@ namespace Commons.Media.PortAudio
 				var ptr = timeInfo != IntPtr.Zero ? new CppInstancePtr (timeInfo) : default (CppInstancePtr);
 				try {
 					byte [] buf = buffer != null ? (byte[])buffer.Target : null;
-					var byteCount = FramesToBytes (frameCount);
+					var byteCount = FramesToBytes ((uint) frameCount);
 					if (buf == null || buf.Length < byteCount) {
 						buf = new byte [byteCount];
 						buffer = new WeakReference (buf);
@@ -245,7 +245,7 @@ namespace Commons.Media.PortAudio
 						0,
 						byteCount,
 						timeInfo != IntPtr.Zero ? Factory.Create<PaStreamCallbackTimeInfo> (ptr) : default (PaStreamCallbackTimeInfo),
-						statusFlags,
+						(PaStreamCallbackFlags) statusFlags,
 						userData
 					);
 					Marshal.Copy (buf, 0, isOutput ? output : input, byteCount);
