@@ -20,8 +20,10 @@ using PaStreamFlags		= System.UInt32;
 namespace Commons.Media.PortAudio
 {
 	#region Typedefs -> delegates
+	[UnmanagedFunctionPointer (CallingConvention.Cdecl)]
 	public delegate PaStreamCallbackResult/*int*/ PaStreamCallback (/*const*/ IntPtr/*void **/input,IntPtr/**void **/output, [MarshalAs (UnmanagedType.SysUInt)] /*unsigned long*/IntPtr frameCount,/*const*/ IntPtr/*PaStreamCallbackTimeInfo **/timeInfo, [MarshalAs (UnmanagedType.SysUInt)] UIntPtr/*PaStreamCallbackFlags*/ statusFlags,IntPtr/*void **/userData);
 
+	[UnmanagedFunctionPointer (CallingConvention.Cdecl)]
 	public delegate void PaStreamFinishedCallback (IntPtr/*void **/userData);
 	#endregion
 	
