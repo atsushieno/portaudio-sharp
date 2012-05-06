@@ -37,33 +37,43 @@ namespace Commons.Media.PortAudio
 	
 	public class PortAudioOutputStream : PortAudioStream
 	{
-		public PortAudioOutputStream (PaStreamParameters outputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioOutputStream (PaStreamParameters outputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, object userData)
 		{
-			using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
-				HandleError (PortAudioInterop.Pa_OpenStream (
-					out handle,
-					IntPtr.Zero,
-					output.Native,
-					sampleRate,
-					framesPerBuffer,
-					streamFlags,
-					ToPaStreamCallback (streamCallback, true),
-					userData
-				));
+			var gch = userData == null ? default (GCHandle) : GCHandle.Alloc (userData, GCHandleType.Pinned);
+			try {
+				using (var output = Factory.ToNative<PaStreamParameters> (outputParameters))
+					HandleError (PortAudioInterop.Pa_OpenStream (
+						out handle,
+						IntPtr.Zero,
+						output.Native,
+						sampleRate,
+						framesPerBuffer,
+						streamFlags,
+						ToPaStreamCallback (streamCallback, true),
+						userData != null ? gch.AddrOfPinnedObject () : IntPtr.Zero));
+			} finally {
+				if (userData != null)
+					gch.Free ();
+			}
 		}
 		
-		public PortAudioOutputStream (int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+		public PortAudioOutputStream (int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, object userData)
 		{
-			HandleError (PortAudioInterop.Pa_OpenDefaultStream (
-				out handle,
-				0,
-				numOutputChannels,
-				(IntPtr) sampleFormat,
-				sampleRate,
-				(IntPtr) framesPerBuffer,
-				ToPaStreamCallback (streamCallback, true),
-				userData
-			));
+			var gch = userData == null ? default (GCHandle) : GCHandle.Alloc (userData, GCHandleType.Pinned);
+			try {
+				HandleError (PortAudioInterop.Pa_OpenDefaultStream (
+					out handle,
+					0,
+					numOutputChannels,
+					(IntPtr) sampleFormat,
+					sampleRate,
+					(IntPtr) framesPerBuffer,
+					ToPaStreamCallback (streamCallback, true),
+					userData != null ? gch.AddrOfPinnedObject () : IntPtr.Zero));
+			} finally {
+				if (userData != null)
+					gch.Free ();
+			}
 		}
 	}
 
