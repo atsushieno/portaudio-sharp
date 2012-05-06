@@ -6,6 +6,7 @@ namespace Commons.Media.PortAudio
 	public class PortAudioInputStream : PortAudioStream
 	{
 		public PortAudioInputStream (PaStreamParameters inputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, IntPtr userData)
+			: base (inputParameters.sampleFormat)
 		{
 			using (var input = Factory.ToNative<PaStreamParameters> (inputParameters))
 				HandleError (PortAudioInterop.Pa_OpenStream (
@@ -21,6 +22,7 @@ namespace Commons.Media.PortAudio
 		}
 		
 		public PortAudioInputStream (int numInputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, IntPtr userData)
+			: base (sampleFormat)
 		{
 			HandleError (PortAudioInterop.Pa_OpenDefaultStream (
 				out handle,
@@ -38,6 +40,7 @@ namespace Commons.Media.PortAudio
 	public class PortAudioOutputStream : PortAudioStream
 	{
 		public PortAudioOutputStream (PaStreamParameters outputParameters, double sampleRate, uint framesPerBuffer, PaStreamFlags streamFlags, StreamCallback streamCallback, object userData)
+			: base (outputParameters.sampleFormat)
 		{
 			var gch = userData == null ? default (GCHandle) : GCHandle.Alloc (userData, GCHandleType.Pinned);
 			try {
@@ -58,6 +61,7 @@ namespace Commons.Media.PortAudio
 		}
 		
 		public PortAudioOutputStream (int numOutputChannels, PaSampleFormat sampleFormat, double sampleRate, uint framesPerBuffer, StreamCallback streamCallback, object userData)
+			: base (sampleFormat)
 		{
 			var gch = userData == null ? default (GCHandle) : GCHandle.Alloc (userData, GCHandleType.Pinned);
 			try {
@@ -80,9 +84,11 @@ namespace Commons.Media.PortAudio
 	public abstract class PortAudioStream : IDisposable
 	{
 		internal IntPtr handle;
+		internal PaSampleFormat sample_format;
 		
-		protected PortAudioStream ()
+		protected PortAudioStream (PaSampleFormat sampleFormat)
 		{
+			this.sample_format = sampleFormat;
 		}
 		
 		protected PortAudioStream (IntPtr handle)
@@ -236,7 +242,19 @@ namespace Commons.Media.PortAudio
 		
 		int FramesToBytes (ulong frames)
 		{
-			return (int)frames;
+			switch (sample_format) {
+			case PaSampleFormat.Int32:
+			case PaSampleFormat.Float32:
+				return (int) frames * 4;
+			case PaSampleFormat.Int16:
+				return (int) frames * 2;
+			case PaSampleFormat.Int24:
+				return (int) frames * 3;
+			case PaSampleFormat.NonInterleaved:
+			case PaSampleFormat.Int8:
+			default:
+				return (int) frames;
+			}
 		}
 		
 		internal unsafe PaStreamCallback ToPaStreamCallback (StreamCallback src, bool isOutput)
@@ -244,7 +262,7 @@ namespace Commons.Media.PortAudio
 			return (input, output, frameCount, timeInfo, statusFlags, userData) => {
 				var ptr = timeInfo != IntPtr.Zero ? new CppInstancePtr (timeInfo) : default (CppInstancePtr);
 				try {
-					byte [] buf = buffer != null ? (byte[])buffer.Target : null;
+					byte [] buf = buffer != null ? (byte[]) buffer.Target : null;
 					var byteCount = FramesToBytes ((uint) frameCount);
 					if (buf == null || buf.Length < byteCount) {
 						buf = new byte [byteCount];
